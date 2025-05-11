@@ -18,7 +18,7 @@ if not os.path.exists(FRAME_PATH):
     os.makedirs(FRAME_PATH)
 
 @app.post("/upload_video/")
-async def upload_video(file: UploadFile = File(...), collection_name: str = "test", host: str = Form()):
+async def upload_video(file: UploadFile = File(...), collection_name: str = "test", host: str = Form("http://localhost:6333")):
     print(f"Received file: {file.filename}")
     print(f"Collection name: {collection_name}")
     print(f"Host: {host}")
@@ -41,7 +41,7 @@ async def upload_video(file: UploadFile = File(...), collection_name: str = "tes
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/search/")
-async def search(image: UploadFile = File(...), collection_name: str = "test", limit: int = 5, host: str = Form()):
+async def search(image: UploadFile = File(...), collection_name: str = "test", limit: int =Form(5), host: str = Form("http://localhost:6333")):
     print(f"Received image: {image.filename}")
     print(f"Collection name: {collection_name}")
     print(f"Limit: {limit}")
