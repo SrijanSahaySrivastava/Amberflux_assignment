@@ -5,7 +5,7 @@
 -   Python
 -   Docker (Qdrant up and running)
 
-### Qdrant Docker Setup
+## Qdrant Docker Setup
 
 ```bash
 docker pull qdrant/qdrant
@@ -16,7 +16,7 @@ docker run -p 6333:6333 -p 6334:6334 \
 https://qdrant.tech/documentation/quickstart/
 
 
-### How to Run
+## How to Run
 
 create env (I used `uv`)
 ```bash
@@ -35,7 +35,10 @@ Run FastAPI server
 uvicorn main:app
 ```
 
-### How to Request
+## How to Request
+- look for file named: `amberflux assignment.postman_collection.json` and import to postman
+ 
+### OR 
 
 #### Upload:
 requires .mp4 file

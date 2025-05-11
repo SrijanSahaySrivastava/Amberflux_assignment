@@ -1,0 +1,109 @@
+{
+	"info": {
+		"_postman_id": "7aafda15-9bf2-4ba7-ba02-4c85c9624a3a",
+		"name": "amberflux assignment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28422633"
+	},
+	"item": [
+		{
+			"name": "http://127.0.0.1:8000/upload_video/?collection_name=test2",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/srija/Documents/Destiny_2_1322238855973175296.mp4"
+						},
+						{
+							"key": "host",
+							"value": "http://localhost:6333",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/upload_video/?collection_name=test2",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"upload_video",
+						""
+					],
+					"query": [
+						{
+							"key": "collection_name",
+							"value": "test2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:8000/search/?collection_name=test2",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "image",
+							"type": "file",
+							"src": "/C:/Users/srija/Documents/GitHub/Amberflux_assignment/files/frame_archive/frame8.jpg"
+						},
+						{
+							"key": "host",
+							"value": "http://localhost:6333",
+							"type": "text"
+						},
+						{
+							"key": "limit",
+							"value": "5",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/search/?collection_name=test2",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"search",
+						""
+					],
+					"query": [
+						{
+							"key": "collection_name",
+							"value": "test2"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
