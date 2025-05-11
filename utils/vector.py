@@ -1,13 +1,13 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
-from frames import computer_vector, computer_vector_from_path
+from utils.frames import computer_vector, computer_vector_from_path
 import os
 
 collection_name = 'test'
-dimensions = 2048
+dimensions = 512
 metric = Distance.COSINE
 
-def setup_collection(collection_name, dimensions, metric, host="http://localhost:6333"):
+def setup_collection(collection_name, dimensions, host="http://localhost:6333"):
     
     client = QdrantClient(url="http://localhost:6333")
     try:
@@ -18,7 +18,7 @@ def setup_collection(collection_name, dimensions, metric, host="http://localhost
                 collection_name = collection_name,
                 vectors_config = VectorParams(
                     size = dimensions, 
-                    distance = metric
+                    distance = Distance.COSINE
                 ),
         )
 
@@ -45,6 +45,7 @@ def insert_points(base_dir, collection_name, host="http://localhost:6333"):
             collection_name=collection_name,
             points=[point]
         )
+        os.remove(os.path.join(frames_dir, image_names[i]))
         print(f"Upserted point {i}")
         
 def search_points(collection_name, query_image_path, limit=5, host="http://localhost:6333"):
@@ -60,5 +61,5 @@ def search_points(collection_name, query_image_path, limit=5, host="http://local
 
 # setup_collection(collection_name, dimensions, metric)
 # insert_points("files", collection_name)
-# print(search_points(collection_name, "files/Frames/frame0.jpg", limit=5))
+# print(search_points(collection_name, "files/Frames/frame893.jpg", limit=5))
 # print(client.get_collection(collection_name=collection_name).points_count)

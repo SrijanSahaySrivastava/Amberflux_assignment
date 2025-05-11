@@ -1,11 +1,12 @@
 import cv2
 import os
 import numpy as np
-from tensorflow.keras.preprocessing.image import load_img, img_to_array
-from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
 
 
-model = ResNet50(weights='imagenet', include_top=False, pooling='avg')
+def simple_color_histogram(image, bins=(8, 8, 8)):
+    hist = cv2.calcHist([image], [0, 1, 2], None, bins, [0, 256, 0, 256, 0, 256])
+    hist = cv2.normalize(hist, hist).flatten()
+    return hist
 
 def get_frame(video_path):
     if not video_path.endswith('.mp4'):
@@ -13,11 +14,11 @@ def get_frame(video_path):
     
     cap = cv2.VideoCapture(video_path)
 
-    frames_dir = os.path.join(os.path.dirname(video_path), "files/Frames")
+    frames_dir = os.path.join(os.path.dirname(video_path), "Frames")
     if not os.path.exists(frames_dir):
         os.makedirs(frames_dir)
         
-    archive_dir = os.path.join(os.path.dirname(video_path), "files/frame_archive")
+    archive_dir = os.path.join(os.path.dirname(video_path), "frame_archive")
     if not os.path.exists(archive_dir):
         os.makedirs(archive_dir)
         
@@ -42,7 +43,7 @@ def get_frame(video_path):
     
     return count
 
-def computer_vector(base_dir):
+def computer_vector(base_dir, bins=(8,8,8)):
     img_path = os.path.join(base_dir, "Frames")
     if not os.path.exists(img_path):
         raise ValueError(f"The image directory does not exist. Please check the path at {img_path}.")
@@ -54,25 +55,28 @@ def computer_vector(base_dir):
     embeddings = []
     for fname in img_files:
         full_path = os.path.join(img_path, fname)
-        image = load_img(full_path, target_size=(224, 224))
-        image = img_to_array(image)
-        image = np.expand_dims(image, axis=0)
-        image = preprocess_input(image)
-        embedding = model.predict(image)
-        embeddings.append(embedding[0])  # embedding is already 1D now
+        image = cv2.imread(full_path)
+        if image is None:
+            continue
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        hist = simple_color_histogram(image, bins)
+        embeddings.append(hist)
+        # os.remove(full_path)
     embeddings = np.array(embeddings)
+    
     return embeddings
 
-def computer_vector_from_path(image_path):
+def computer_vector_from_path(image_path, bins=(8,8,8)):
     if not os.path.exists(image_path):
         raise ValueError(f"The image path does not exist. Please check the path at {image_path}.")
     
-    image = load_img(image_path, target_size=(224, 224))
-    image = img_to_array(image)
-    image = np.expand_dims(image, axis=0)
-    image = preprocess_input(image)
-    embedding = model.predict(image)
-    return embedding[0]  # Return the 1D array
+    image = cv2.imread(image_path)
+    if image is None:
+        raise ValueError(f"Unable to read image at {image_path}.")
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    hist = simple_color_histogram(image, bins)
+    os.remove(image_path)
+    return hist
 
 # get_frame("Destiny_2_1322238855973175296.mp4")
 # print(computer_vector("files").shape)
