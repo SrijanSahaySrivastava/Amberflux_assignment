@@ -2,7 +2,9 @@ import os
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 
-from utils.frames import get_frame
+from utils.frames import get_frame, computer_vector, computer_vector_from_path
+from utils.vector import setup_collection, insert_points, search_points
+from qdrant_client import QdrantClient
 
 
 from pydantic import BaseModel
@@ -16,18 +18,20 @@ if not os.path.exists(FRAME_PATH):
     os.makedirs(FRAME_PATH)
 
 @app.post("/upload_video/")
-async def upload_video(file: UploadFile = File(...)):
+async def upload_video(file: UploadFile = File(...), collection_name: str = "test"):
     try:
-        # Save the uploaded video file
         file_location = os.path.join(FRAME_PATH, file.filename)
         with open(file_location, "wb+") as file_object:
             file_object.write(file.file.read())
         
         count_extracted_frames = get_frame(file_location)
+        if count_extracted_frames == 0:
+            raise HTTPException(status_code=400, detail="No frames extracted from the video.")
         
-        
-        
-        return {"file_path": file_location}
+        setup_collection(collection_name, dimensions=2048, metric="cosine")
+        insert_points(FRAME_PATH, collection_name)
+        print(f"Inserted {count_extracted_frames} points into the collection {collection_name}.")
+        return {"message": f"Video uploaded and processed successfully. {count_extracted_frames} frames extracted."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -1,10 +1,10 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
-from frames import computer_vector
+from frames import computer_vector, computer_vector_from_path
 import os
 
 collection_name = 'test'
-dimensions = 2
+dimensions = 2048
 metric = Distance.COSINE
 
 def setup_collection(collection_name, dimensions, metric, host="http://localhost:6333"):
@@ -12,7 +12,6 @@ def setup_collection(collection_name, dimensions, metric, host="http://localhost
     client = QdrantClient(url="http://localhost:6333")
     try:
         client.get_collection(collection_name=collection_name)
-        # Create a new collection
     except Exception as e:
         print(f"Collection {collection_name} does not exist. Creating a new one. Error: {e}")
         client.create_collection(
@@ -33,7 +32,6 @@ def insert_points(base_dir, collection_name, host="http://localhost:6333"):
     image_names = sorted([f for f in os.listdir(frames_dir) if f.endswith('.jpg')])
     
     for i, vector in enumerate(vectors):
-        print(f"Processing image {i+1}/{len(vectors)}: {image_names[i]}")
         flat_vector = vector.flatten().tolist()
         point = PointStruct(
             id=i,
@@ -42,14 +40,25 @@ def insert_points(base_dir, collection_name, host="http://localhost:6333"):
                 "image_path": image_names[i]
             }
         )
-        points.append(point)
-    print(f"Total points to insert: {len(points)}")
-    
-    client.upsert(
+        # Upsert the point individually
+        client.upsert(
+            collection_name=collection_name,
+            points=[point]
+        )
+        print(f"Upserted point {i}")
+        
+def search_points(collection_name, query_image_path, limit=5, host="http://localhost:6333"):
+    client = QdrantClient(url=host)
+    query_vector = computer_vector_from_path(query_image_path)
+    results = client.query_points(
         collection_name=collection_name,
-        points=points
+        query=query_vector,
+        limit=limit
     )
+    return results
 
-setup_collection(collection_name, 512, metric)
-insert_points("files", collection_name)
+
+# setup_collection(collection_name, dimensions, metric)
+# insert_points("files", collection_name)
+# print(search_points(collection_name, "files/Frames/frame0.jpg", limit=5))
 # print(client.get_collection(collection_name=collection_name).points_count)

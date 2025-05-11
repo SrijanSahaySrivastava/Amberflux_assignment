@@ -2,6 +2,10 @@ import cv2
 import os
 import numpy as np
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
+from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
+
+
+model = ResNet50(weights='imagenet', include_top=False, pooling='avg')
 
 def get_frame(video_path):
     if not video_path.endswith('.mp4'):
@@ -39,26 +43,36 @@ def get_frame(video_path):
     return count
 
 def computer_vector(base_dir):
-    
     img_path = os.path.join(base_dir, "Frames")
     if not os.path.exists(img_path):
-        raise ValueError(f"The image file does not exist. Please check the path at {img_path}.")
+        raise ValueError(f"The image directory does not exist. Please check the path at {img_path}.")
     
-    img = os.listdir(img_path)
-    if not img:
-        raise ValueError("The image directory is empty.")
-    img = [f for f in img if f.endswith('.jpg')]
-    if not img:
+    img_files = sorted([f for f in os.listdir(img_path) if f.endswith('.jpg')])
+    if not img_files:
         raise ValueError("No jpg files found in the image directory.")
-    res = []
-    for i in img:
-        image = load_img(os.path.join(img_path, i), target_size=(224, 224))
-        image = img_to_array(image) / 255.0
-        image = np.expand_dims(image, axis=0)
-        res.append(image)
-    res = np.array(res)
     
-    return res
+    embeddings = []
+    for fname in img_files:
+        full_path = os.path.join(img_path, fname)
+        image = load_img(full_path, target_size=(224, 224))
+        image = img_to_array(image)
+        image = np.expand_dims(image, axis=0)
+        image = preprocess_input(image)
+        embedding = model.predict(image)
+        embeddings.append(embedding[0])  # embedding is already 1D now
+    embeddings = np.array(embeddings)
+    return embeddings
+
+def computer_vector_from_path(image_path):
+    if not os.path.exists(image_path):
+        raise ValueError(f"The image path does not exist. Please check the path at {image_path}.")
+    
+    image = load_img(image_path, target_size=(224, 224))
+    image = img_to_array(image)
+    image = np.expand_dims(image, axis=0)
+    image = preprocess_input(image)
+    embedding = model.predict(image)
+    return embedding[0]  # Return the 1D array
 
 # get_frame("Destiny_2_1322238855973175296.mp4")
 # print(computer_vector("files").shape)
